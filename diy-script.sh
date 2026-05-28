@@ -115,3 +115,9 @@ find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/
 
 ./scripts/feeds update -a
 ./scripts/feeds install -a
+
+# 禁用有递归依赖问题的包
+sed -i 's/CONFIG_PACKAGE_kmod-oaf=y/# CONFIG_PACKAGE_kmod-oaf is not set/g' .config
+sed -i 's/CONFIG_PACKAGE_luci-app-oaf=y/# CONFIG_PACKAGE_luci-app-oaf is not set/g' .config
+sed -i 's/CONFIG_PACKAGE_kmod-oaf=m/# CONFIG_PACKAGE_kmod-oaf is not set/g' .config
+sed -i 's/CONFIG_PACKAGE_luci-app-oaf=m/# CONFIG_PACKAGE_luci-app-oaf is not set/g' .config
