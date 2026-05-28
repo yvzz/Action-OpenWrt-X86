@@ -16,6 +16,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         retain_days: 2
         delete_workflow_runs: true
+        delete_failed_runs: true
         keep_successful_runs: 10
         keep_successful_runs_count: 2
 
