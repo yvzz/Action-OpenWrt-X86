@@ -10,12 +10,14 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Delete Old Workflows
+    - name: Delete Old Workflows (Keep Success)
       uses: Mattraks/delete-workflow-runs@main
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         retain_days: 2
-        keep_minimum_runs: 0
+        delete_workflow_runs: true
+        keep_successful_runs: 3
+        keep_successful_runs_count: 2
 
     - name: Delete Old Releases
       uses: dev-drprasad/delete-older-releases@master
