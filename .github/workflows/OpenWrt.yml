@@ -89,13 +89,16 @@ jobs:
       run: |
         d '
           cd ${wrtdir}
+          # 清理 CMake 构建缓存
+          rm -rf build_dir/host/cmake-*
+
           p "开始下载"
           make download -j$(($(nproc) + 1))
           p "开始编译"
-          make -j$(($(nproc) + 1))
+          make -j$(($(nproc) + 1)) CMAKE_NO_GHS_MULTI=1
           if [ $? -ne 0 ]; then
             p "！！编译失败！！开启单线程"
-            make -j1 V=s
+            make -j1 V=s CMAKE_NO_GHS_MULTI=1
           else
             p "编译成功"
             . set_env build_success "true"
