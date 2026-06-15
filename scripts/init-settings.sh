@@ -9,14 +9,14 @@ uci commit luci
 # LAN 配置 (修改 IP 为 10.10.10.1)
 uci set network.lan.ipaddr='10.10.10.1'
 uci set network.lan.netmask='255.255.255.0'
-uci set network.lan.gateway='10.10.10.1'
-uci set network.lan.dns='10.10.10.1'
 
 # WAN 配置 (DHCP 自动获取)
 # 如果需要 PPPoE，取消下面的注释并修改账号密码
-uci set network.wan=interface
-uci set network.wan.device='eth1'
-uci set network.wan.proto='dhcp'
+# 注意：x86 虚拟机通常只有一个网卡(eth0)，不需要单独创建 WAN
+# 如果确实有两个网卡(eth0+eth1)，取消下面的注释
+# uci set network.wan=interface
+# uci set network.wan.device='eth1'
+# uci set network.wan.proto='dhcp'
 # uci set network.wan.proto='pppoe'
 # uci set network.wan.username='你的宽带账号'
 # uci set network.wan.password='你的宽带密码'
