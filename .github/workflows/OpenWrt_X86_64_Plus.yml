@@ -24,7 +24,7 @@ env:
   UPLOAD_WETRANSFER: true
   UPLOAD_RELEASE: true
   FIRMWARE_TAG: X86_64
-  DEFAULT_IP: 10.10.10.1
+  DEFAULT_IP: 10.3.2.1
   TZ: Asia/Shanghai
 
 jobs:
