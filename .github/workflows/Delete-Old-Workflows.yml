@@ -10,15 +10,13 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - name: Delete Old Workflows (Keep Success)
+    - name: Delete Old Workflows
       uses: Mattraks/delete-workflow-runs@main
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         retain_days: 1
-        delete_workflow_runs: true
-        delete_failed_runs: true
-        keep_successful_runs: 10
-        keep_successful_runs_count: 2
+        keep_minimum_runs: 10
+        delete_run_by_conclusion_pattern: failure
 
     - name: Delete Old Releases
       uses: dev-drprasad/delete-older-releases@master
@@ -27,3 +25,4 @@ jobs:
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
