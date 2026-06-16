@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 修复 samba4 + autosamba 文件冲突
+[ -f package/lean/autosamba/files/20-smb ] && rm -f package/lean/autosamba/files/20-smb
+[ -f feeds/luci/applications/luci-app-autosamba/root/etc/hotplug.d/block/20-smb ] && rm -f feeds/luci/applications/luci-app-autosamba/root/etc/hotplug.d/block/20-smb
+
 # 修改默认IP
 sed -i 's/10.0.0.1/10.0.0.252/g' package/base-files/files/bin/config_generate
 	
