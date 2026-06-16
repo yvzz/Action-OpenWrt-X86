@@ -1,5 +1,5 @@
 
-name: X86_64_OpenWrt_Docker_Plus
+name: OpenWrt-X86_64_OpenWrt_Plus+Docker
 
 on:
   workflow_dispatch:
