@@ -241,7 +241,7 @@ jobs:
       with:
         name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }} (${{ env.LAN_IP }})
         allowUpdates: true
-        tag: ${{ env.FIRMWARE_TAG }}_Vpn_${{ env.LAN_IP }}
+        tag: ${{ env.FIRMWARE_TAG }}_Vpn
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |

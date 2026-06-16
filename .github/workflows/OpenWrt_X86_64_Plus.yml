@@ -242,7 +242,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }} (${{ env.LAN_IP }})
-        tag: ${{ env.FIRMWARE_TAG }}_Plus_${{ env.LAN_IP }}
+        tag: ${{ env.FIRMWARE_TAG }}_Plus
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         allowUpdates: true
         token: ${{ secrets.GITHUB_TOKEN }}
