@@ -1,15 +1,15 @@
 
-name: OpenWrt-X86_64
+name: OpenWrt-X86_64_Plus
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 19 * * 4
+    - cron: 0 20 * * 4
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: configs/x86_64.config
+  CONFIG_FILE: configs/x86_64_VPN.config
   DIY_SCRIPT: diy-script.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
@@ -23,13 +23,11 @@ env:
 
 jobs:
   Build:
-    runs-on: "ubuntu-24.04"
-
+    runs-on: ubuntu-22.04
 
     steps:
-    - name: 检查服务器性能
+    - name: Check Server Performance
       run: |
-        echo "----------------------------------------------------------"
         echo "警告⚠"
         echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
         echo -e "已知CPU型号(降序): 9V74，7763，8370C，8272CL，8171M，E5-2673\n"
@@ -42,12 +40,12 @@ jobs:
         echo -e "$(sudo lshw -short -C memory | grep GiB)\n"
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
-    
-    - name: 初始化环境
+
+    - name: Initialization Environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        docker rmi $(docker images -q) || true
+        docker rmi $(docker images -q) 2>/dev/null || true
         sudo rm -rf /usr/share/dotnet /usr/local/lib/android $AGENT_TOOLSDIRECTORY
         sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* openjdk* mongodb* moby* || true
         sudo -E apt-get -y update
@@ -66,14 +64,14 @@ jobs:
         sudo -E apt-get -y clean
         sudo timedatectl set-timezone "$TZ"
 
-    - name: 清理磁盘前
+    - name: Before freeing up disk space
       run: |
         echo "Before freeing up disk space"
         echo "=============================================================================="
         df -hT
         echo "=============================================================================="
-    
-    - name: 优化磁盘空间
+
+    - name: "Optimize Disk Space"
       uses: "sclsyin/disk-space-optimizer-ghaction@main"
       with:
         operate_sudo: "True"
@@ -94,28 +92,29 @@ jobs:
         npm_clean: "True"
         os_swap: "True"
 
-    - name: 释放磁盘空间
+    - name: Freeing up disk space
       uses: sclsyin/maximize-build-space@master
       with: 
          root-reserve-mb: 2048
-         swap-size-mb: 8192
+         swap-size-mb: 1
          remove-dotnet: 'true'
          remove-android: 'true'
          remove-haskell: 'true'
          remove-codeql: 'true'
          remove-docker-images: 'true'
 
-    - name: 磁盘清理完成
+    - name: Free up disk space complete
       run: |
          echo "Free up disk space complete"
          echo "=============================================================================="
          df -hT
          echo "=============================================================================="
-    
-    - name: 检出代码
+
+
+    - name: Checkout
       uses: actions/checkout@main
 
-    - name: 克隆源码
+    - name: Clone Source Code
       run: |
         df -hT $GITHUB_WORKSPACE
         git clone $REPO_URL -b $REPO_BRANCH openwrt
@@ -129,8 +128,8 @@ jobs:
         echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
         COMMIT_HASH=$(git show -s --date=short --format="hash: %H")
         echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
-    
-    - name: 生成变量
+
+    - name: Generate Variables
       run: |
         cp $CONFIG_FILE $OPENWRT_PATH/.config
         cd $OPENWRT_PATH
@@ -141,8 +140,8 @@ jobs:
         echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
         DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
         echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
-    
-    - name: 缓存工具链
+
+    - name: Cache Toolchain
       if: env.CACHE_TOOLCHAIN == 'true'
       uses: HiGarfield/cachewrtbuild@main
       with:
@@ -150,13 +149,13 @@ jobs:
         mixkey: ${{ env.SOURCE_REPO }}-${{ env.REPO_BRANCH }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
         prefix: ${{ env.OPENWRT_PATH }}
 
-    - name: 安装feeds
+    - name: Install Feeds
       run: |
         cd $OPENWRT_PATH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        
-    - name: 加载自定义配置
+
+    - name: Load Custom Configuration
       run: |
         [ -e files ] && mv files $OPENWRT_PATH/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_PATH/.config
@@ -167,16 +166,16 @@ jobs:
         $GITHUB_WORKSPACE/scripts/preset-clash-core.sh $CLASH_KERNEL
         $GITHUB_WORKSPACE/scripts/preset-terminal-tools.sh
         $GITHUB_WORKSPACE/scripts/preset-adguard-core.sh $CLASH_KERNEL
-  
-    - name: 下载依赖包
+
+    - name: Download DL Package
       run: |
         cd $OPENWRT_PATH
         make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-    
-    - name: 编译固件
+
+    - name: Compile Firmware
       id: compile
       run: |
         cd $OPENWRT_PATH
@@ -187,47 +186,46 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
-    
-    - name: 检查空间使用
+
+    - name: Check Space Usage
       if: (!cancelled())
       run: df -hT
-      
-    - name: 整理文件
+
+    # - name: Upload Bin Directory
+    #   if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+    #   uses: actions/upload-artifact@main
+    #   with:
+    #     name: ${{ env.SOURCE_REPO }}-bin-plus-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.FILE_DATE }}
+    #     path: ${{ env.OPENWRT_PATH }}/bin
+
+    - name: Organize Files
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH/bin/targets/*/*
         cat sha256sums
         cp $OPENWRT_PATH/.config build.config
-        mkdir -p packages
-        find $OPENWRT_PATH/bin/packages -name "*.ipk" -exec mv {} packages/ \; 2>/dev/null || true
-        tar -zcf Packages.tar.gz packages 2>/dev/null || true
+        mv -f $OPENWRT_PATH/bin/packages/*/*/*.ipk packages
+        tar -zcf Packages.tar.gz packages
         rm -rf packages feeds.buildinfo version.buildinfo
         echo "KERNEL=$(cat *.manifest | grep ^kernel | cut -d- -f2 | tr -d ' ')" >> $GITHUB_ENV
         echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
 
-    - name: 上传固件到Artifact
-      if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
-      uses: actions/upload-artifact@main
-      with:
-        name: ${{ env.SOURCE_REPO }}-firmware-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE_PATH }}/*
+    # - name: Upload Firmware To Artifact
+    #   if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
+    #   uses: actions/upload-artifact@main
+    #   with:
+    #     name: ${{ env.SOURCE_REPO }}-firmware-plus-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.FILE_DATE }}
+    #     path: ${{ env.FIRMWARE_PATH }}
 
-    - name: 生成Release标签
-      id: tag
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      run: |
-        echo "release_tag=$(date +"%Y.%m.%d")" >> $GITHUB_OUTPUT
-        echo "status=success" >> $GITHUB_OUTPUT
-    
-    - name: 上传固件到Release
+    - name: Upload Firmware To Release
       if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
       uses: ncipollo/release-action@v1
       with:
         name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }}
-        tag: ${{ env.FIRMWARE_TAG }}_Mini
-        artifacts: ${{ env.FIRMWARE_PATH }}/*
         allowUpdates: true
+        tag: ${{ env.FIRMWARE_TAG }}_Plus
         token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |
           ### 📒 固件信息
           - 💻 平台架构: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
