@@ -3,6 +3,12 @@ name: OpenWrt X86_64_Plus+Docker
 
 on:
   workflow_dispatch:
+    inputs:
+      lan_ip:
+        description: 'LAN IP 地址（默认从配置文件读取）'
+        required: false
+        default: ''
+        type: string
   schedule:
     - cron: 0 21 * * *
 
@@ -15,10 +21,10 @@ env:
   CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: true
   FIRMWARE_RELEASE: true
-  UPLOAD_COWTRANSFER: true
   UPLOAD_WETRANSFER: true
   UPLOAD_RELEASE: true
   FIRMWARE_TAG: X86_64
+  DEFAULT_IP: 10.10.10.1
   TZ: Asia/Shanghai
 
 jobs:
@@ -141,6 +147,17 @@ jobs:
         DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
         echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
 
+    - name: 确定IP地址
+      run: |
+        if [ -n "${{ inputs.lan_ip }}" ]; then
+          LAN_IP="${{ inputs.lan_ip }}"
+        else
+          LAN_IP=$(grep "lan.ipaddr" $GITHUB_WORKSPACE/scripts/init-settings.sh | grep -oP "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1)
+          LAN_IP="${LAN_IP:-$DEFAULT_IP}"
+        fi
+        echo "LAN_IP=$LAN_IP" >> $GITHUB_ENV
+        echo "IP已设置: $LAN_IP"
+
     - name: Cache Toolchain
       if: env.CACHE_TOOLCHAIN == 'true'
       uses: HiGarfield/cachewrtbuild@main
@@ -181,6 +198,7 @@ jobs:
         cd $OPENWRT_PATH
         mkdir -p files/etc/uci-defaults
         cp $GITHUB_WORKSPACE/scripts/init-settings.sh files/etc/uci-defaults/99-init-settings
+        sed -i "s/uci set network.lan.ipaddr=.*/uci set network.lan.ipaddr='$LAN_IP'/" files/etc/uci-defaults/99-init-settings
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
@@ -221,8 +239,8 @@ jobs:
       if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
       uses: ncipollo/release-action@v1
       with:
-        name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }}
-        tag: ${{ env.FIRMWARE_TAG }}_docker_plus
+        name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }} (${{ env.LAN_IP }})
+        tag: ${{ env.FIRMWARE_TAG }}_Plus_Docker_${{ env.LAN_IP }}
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         allowUpdates: true
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -232,5 +250,5 @@ jobs:
           - ⚽ 固件源码: ${{ env.REPO_URL }}
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
           - 🚀 内核版本: ${{ env.KERNEL }}
-          - 🌐 默认地址: 192.168.1.1
+          - 🌐 默认地址: ${{ env.LAN_IP }}
           - 🔑 默认密码: password
