@@ -13,8 +13,8 @@ on:
     - cron: 0 20 * * *
 
 env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
-  REPO_BRANCH: master
+  REPO_URL: https://github.com/openwrt/openwrt
+  REPO_BRANCH: main
   CONFIG_FILE: configs/x86_64_VPN.config
   DIY_SCRIPT: diy-script.sh
   CLASH_KERNEL: amd64
