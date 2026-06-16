@@ -1,5 +1,5 @@
 
-name: OpenWrt-X86_64_VPN
+name: OpenWrt X86_64_VPN
 
 on:
   workflow_dispatch:
