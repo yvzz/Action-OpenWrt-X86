@@ -4,7 +4,7 @@ name: OpenWrt X86_64_VPN
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 20 * * 4
+    - cron: 0 20 * * *
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
