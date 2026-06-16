@@ -1,0 +1,11 @@
+#!/bin/sh
+# 1. 设置 LuCI 默认语言为中文（iStore 跟随此设置）
+uci set luci.languages.zh-cn='Chinese'
+uci set luci.main.lang='zh_cn'
+uci add_list luci.languages='zh-cn'
+
+# 2. 系统默认语言
+uci set system.@system[0].zonename='Asia/Shanghai'
+
+uci commit luci
+uci commit system

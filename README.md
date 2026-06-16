@@ -1,1 +1,1 @@
-# OpenWrt
+# Action OpenWrt X86_64
