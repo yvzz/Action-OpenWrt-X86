@@ -19,10 +19,12 @@ jobs:
         delete_run_by_conclusion_pattern: failure
 
     - name: Delete Old Releases
-      uses: dev-drprasad/delete-older-releases@master
-      with:
-        keep_latest: 5
-        delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      run: |
+        KEEP=5
+        RELEASES=$(gh release list -R ${{ github.repository }} --limit 100 --json tagName,createdAt -q 'sort_by(.createdAt) | reverse | .['"$KEEP"':] | .[].tagName')
+        for tag in $RELEASES; do
+          echo "Deleting release: $tag"
+          gh release delete "$tag" -R ${{ github.repository }} --yes --cleanup-tag
+        done
