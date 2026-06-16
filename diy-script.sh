@@ -79,6 +79,12 @@ git_sparse_clone main https://github.com/linkease/istore luci
 # 修复 hostapd 报错
 cp -f $GITHUB_WORKSPACE/scripts/011-fix-mbo-modules-build.patch package/network/services/hostapd/patches/011-fix-mbo-modules-build.patch
 
+# 修复 frp npm ENOTEMPTY 竞态错误（Ubuntu 24.04 + npm 10+）
+# 给 npm install 加 --force 防止目录重命名冲突
+if [ -f feeds/packages/net/frp/Makefile ]; then
+  sed -i 's/npm install /npm install --force ' feeds/packages/net/frp/Makefile
+fi
+
 # 修复 xfsprogs 编译（armv8）
 sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
 
