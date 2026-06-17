@@ -16,7 +16,7 @@ env:
   REPO_URL: https://github.com/openwrt/openwrt
   REPO_BRANCH: main
   CONFIG_FILE: configs/x86_64_Plus+Docker.config
-  DIY_SCRIPT: scripts/diy-plus+docker.sh
+  DIY_SCRIPT: scripts/openwrt-plus+docker.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: true

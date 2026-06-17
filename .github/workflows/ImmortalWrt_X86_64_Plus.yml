@@ -1,5 +1,5 @@
 
-name: OpenWrt X86_64_Plus
+name: ImmortalWrt X86_64_Plus
 
 on:
   workflow_dispatch:
@@ -13,10 +13,10 @@ on:
     - cron: 0 19 * * *
 
 env:
-  REPO_URL: https://github.com/openwrt/openwrt
-  REPO_BRANCH: main
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  REPO_BRANCH: master
   CONFIG_FILE: configs/x86_64_Plus.config
-  DIY_SCRIPT: scripts/openwrt-plus.sh
+  DIY_SCRIPT: scripts/ImmortalWrt-plus.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: true
