@@ -102,6 +102,8 @@ find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/
 # 修复 frp npm ENOTEMPTY 竞态错误（Ubuntu 24.04 + npm10）
 # 必须在 feeds install 之后执行，否则 Makefile 不存在
 if [ -f feeds/packages/net/frp/Makefile ]; then
+  # 强制串行编译，修复 npm ENOTEMPTY 并行竞态
+  sed -i '/^include \$(INCLUDE_DIR)\/package.mk/a PKG_BUILD_PARALLEL:=0' feeds/packages/net/frp/Makefile
   sed -i 's/npm install /npm install --force --prefer-offline /g' feeds/packages/net/frp/Makefile
 fi
 
