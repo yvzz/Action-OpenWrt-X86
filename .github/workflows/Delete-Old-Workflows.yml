@@ -28,8 +28,8 @@ jobs:
       uses: Mattraks/delete-workflow-runs@main
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        retain_days: ${{ inputs.retain_days || 1 }}
-        keep_minimum_runs: ${{ inputs.retain_days || 1 }}
+        retain_days: ${{ inputs.delete_all_failed == 'YES' && 0 || inputs.retain_days || 1 }}
+        keep_minimum_runs: ${{ inputs.delete_all_failed == 'YES' && 0 || inputs.retain_days || 1 }}
         delete_run_by_conclusion_pattern: ${{ inputs.delete_all_failed == 'YES' && 'failure' || '' }}
 
     - name: Delete Old Releases
