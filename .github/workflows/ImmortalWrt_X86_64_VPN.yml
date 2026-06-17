@@ -10,7 +10,7 @@ on:
         default: ''
         type: string
   schedule:
-    - cron: 0 20 * * *
+    - cron: 30 20 * * *
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
