@@ -2,6 +2,20 @@ name: Delete Old Workflows
 
 on:
   workflow_dispatch:
+    inputs:
+      delete_all_failed:
+        description: '是否删除全部失败的 Workflow'
+        required: true
+        type: choice
+        default: 'NO'
+        options:
+          - 'YES'
+          - 'NO'
+      retain_days:
+        description: '保留最近几天的 Workflow'
+        required: true
+        type: number
+        default: 1
   schedule:
     - cron: 0 3 * * 0
 
@@ -14,9 +28,9 @@ jobs:
       uses: Mattraks/delete-workflow-runs@main
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        retain_days: 1
-        keep_minimum_runs: 10
-        delete_run_by_conclusion_pattern: failure
+        retain_days: ${{ inputs.retain_days || 1 }}
+        keep_minimum_runs: ${{ inputs.retain_days || 1 }}
+        delete_run_by_conclusion_pattern: ${{ inputs.delete_all_failed == 'YES' && 'failure' || '' }}
 
     - name: Delete Old Releases
       env:
