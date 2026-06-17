@@ -45,9 +45,6 @@ git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall2 package/luci-
 # OpenClash
 git_sparse_clone master https://github.com/vernesong/OpenClash luci-app-openclash
 
-# ============================================================
-# 主题
-# ============================================================
 
 # Argon 主题（jerrykuku 版）
 git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
@@ -76,8 +73,8 @@ git_sparse_clone main https://github.com/linkease/istore luci
 # 修复与适配
 # ============================================================
 
-# 修复 hostapd 报错
-cp -f $GITHUB_WORKSPACE/scripts/011-fix-mbo-modules-build.patch package/network/services/hostapd/patches/011-fix-mbo-modules-build.patch
+# 修复 hostapd 报错 — patch 文件缺失，已禁用
+# cp -f $GITHUB_WORKSPACE/scripts/011-fix-mbo-modules-build.patch package/network/services/hostapd/patches/011-fix-mbo-modules-build.patch
 
 # 修复 xfsprogs 编译（armv8）
 sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
@@ -98,14 +95,6 @@ find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-# ============================================================
-# 修复 frp npm ENOTEMPTY 竞态错误（Ubuntu 24.04 + npm10）
-# 必须在 feeds install 之后执行，否则 Makefile 不存在
-if [ -f feeds/packages/net/frp/Makefile ]; then
-  # 强制串行编译，修复 npm ENOTEMPTY 并行竞态
-  sed -i '/^include \$(INCLUDE_DIR)\/package.mk/a PKG_BUILD_PARALLEL:=0' feeds/packages/net/frp/Makefile
-  sed -i 's/npm install /npm install --force --prefer-offline /g' feeds/packages/net/frp/Makefile
-fi
 
 # 禁用有问题的包
 # ============================================================
