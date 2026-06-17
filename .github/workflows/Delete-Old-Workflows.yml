@@ -24,13 +24,23 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - name: Delete Old Workflows
+    - name: Delete All Failed Workflows
+      if: ${{ inputs.delete_all_failed == 'YES' }}
       uses: Mattraks/delete-workflow-runs@main
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        retain_days: ${{ inputs.delete_all_failed == 'YES' && 0 || inputs.retain_days || 1 }}
-        keep_minimum_runs: ${{ inputs.delete_all_failed == 'YES' && 0 || inputs.retain_days || 1 }}
-        delete_run_by_conclusion_pattern: ${{ inputs.delete_all_failed == 'YES' && 'failure' || '' }}
+        retain_days: 0
+        keep_minimum_runs: 0
+        delete_run_by_conclusion_pattern: failure
+
+    - name: Delete Old Workflows By Days
+      if: ${{ inputs.delete_all_failed != 'YES' }}
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        retain_days: ${{ inputs.retain_days || 1 }}
+        keep_minimum_runs: ${{ inputs.retain_days || 1 }}
+        delete_run_by_conclusion_pattern: ''
 
     - name: Delete Old Releases
       env:
