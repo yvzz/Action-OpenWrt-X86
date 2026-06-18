@@ -241,7 +241,7 @@ jobs:
       if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
       uses: ncipollo/release-action@v1
       with:
-        name: ImmortalWrt - R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }} (${{ env.LAN_IP }})
+        name: ImmortalWrt - R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }} 
         tag: ImmortalWrt-${{ env.FIRMWARE_TAG }}_Plus
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         allowUpdates: true

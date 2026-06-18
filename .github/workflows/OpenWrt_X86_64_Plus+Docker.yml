@@ -239,7 +239,7 @@ jobs:
       if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
       uses: ncipollo/release-action@v1
       with:
-        name: OpenWrt - R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }} (${{ env.LAN_IP }})
+        name: OpenWrt - R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }} 
         tag: OpenWrt-${{ env.FIRMWARE_TAG }}_Plus_Docker
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         allowUpdates: true
