@@ -96,6 +96,12 @@ find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
+# 修复 frp npm ENOTEMPTY 并行竞态
+if [ -f feeds/packages/net/frp/Makefile ]; then
+  sed -i '/^include $(INCLUDE_DIR)\/package.mk/a PKG_BUILD_PARALLEL:=0' feeds/packages/net/frp/Makefile
+  sed -i 's/npm install /npm install --force --prefer-offline /g' feeds/packages/net/frp/Makefile
+fi
+
 
 # 禁用有问题的包
 # ============================================================
